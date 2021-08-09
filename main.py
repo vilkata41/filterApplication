@@ -60,7 +60,7 @@ if __name__ == '__main__':
             print('landmark195 coords: ', center)
             print(image.shape)
 
-            filter_width = right[0] - left[0]
+            filter_width = int((right[0] - left[0]) * 1.4)
             filter_height = int(filter_width / filter_ratio)
 
             top_left = (int(center[0] - filter_width/2), int(center[1] - filter_height/2))
@@ -74,8 +74,8 @@ if __name__ == '__main__':
 
             ironman_filter = cv2.resize(ironman_filter, (filter_width, filter_height))
 
-            x_offset = int(left[0] * 1)
-            y_offset = int(top[1] * 0.8)
+            x_offset = int(left[0] * 0.8)
+            y_offset = int(top[1] * 1.2)
 
             y1, y2 = y_offset, y_offset + ironman_filter.shape[0]
             x1, x2 = x_offset, x_offset + ironman_filter.shape[1]
