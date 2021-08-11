@@ -1,3 +1,5 @@
+import os
+
 import mediapipe as mp
 import cv2
 import requests
@@ -41,6 +43,11 @@ if __name__ == '__main__':
             print("problem")
 
     IMAGE_FILES = ['test_person.jpg', 'test_people.JPEG']
+
+    for file in os.listdir('imgs'):
+        image = 'imgs/' + file
+        IMAGE_FILES.append(image)
+
     face_mesh = mp_face_mesh.FaceMesh(
         static_image_mode=True,
         max_num_faces=3,
@@ -85,11 +92,11 @@ if __name__ == '__main__':
             right = (int(face_landmarks.landmark[454].x * width), int(face_landmarks.landmark[454].y * height))
             center = (int(face_landmarks.landmark[195].x * width), int(face_landmarks.landmark[195].y * height))
 
-            print('landmark10 coords: ', top)
-            print('landmark152 coords: ', bot)
-            print('landmark34 coords: ', left)
-            print('landmark454 coords: ', right)
-            print('landmark195 coords: ', center)
+            print('landmark10(top) coords: ', top)
+            print('landmark152(bot) coords: ', bot)
+            print('landmark34(left) coords: ', left)
+            print('landmark454(right) coords: ', right)
+            print('landmark195(center) coords: ', center)
             print(image.shape)
 
             filter_width = int((right[0] - left[0]) * 1.4)
@@ -116,8 +123,7 @@ if __name__ == '__main__':
             alpha_l = 1.0 - alpha_s
 
             for c in range(0, 3):
-                filtered_image[y1:y2, x1:x2, c] = (alpha_s * ironman_filter[:, :, c] +
-                                          alpha_l * filtered_image[y1:y2, x1:x2, c])
+                filtered_image[y1:y2, x1:x2, c] = (alpha_s * ironman_filter[:, :, c] + alpha_l * filtered_image[y1:y2, x1:x2, c])
 
 
             #cv2.imshow('test', filtered_image)
