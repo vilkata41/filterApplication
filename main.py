@@ -1,12 +1,44 @@
 import mediapipe as mp
 import cv2
-import numpy as np
-
+import requests
+import shutil
 from mediapipe.python.solutions.drawing_utils import DrawingSpec, BLUE_COLOR
 
 if __name__ == '__main__':
     mp_drawing = mp.solutions.drawing_utils
     mp_face_mesh = mp.solutions.face_mesh
+    api_all_url = "https://tweetfilteredrestapi.ey.r.appspot.com/api/tweetfilteredV1/all"
+    response = requests.get(api_all_url)
+    print(response.json())
+
+    IMAGE_URLS = []
+
+    for post in response.json():
+        if post['media'] is not None:
+            for m in post['media']:
+                IMAGE_URLS.append(m)
+
+    for img in IMAGE_URLS:
+        filename = img.split("/")[-1]
+
+        r = requests.get(img, stream = True)
+
+        if r.status_code == 200 and not "?tag=12" in filename:
+            filename = "imgs/" + filename
+            r.raw.decode_content = True
+
+            with open(filename, 'wb') as f:
+                shutil.copyfileobj(r.raw, f)
+
+        elif r.status_code == 200 and "?tag=12" in filename:
+            filename = "vids/" + filename.strip("?tag=12")
+            r.raw.decode_content = True
+
+            with open(filename, 'wb') as f:
+                shutil.copyfileobj(r.raw, f)
+
+        else:
+            print("problem")
 
     IMAGE_FILES = ['test_person.jpg', 'test_people.JPEG']
     face_mesh = mp_face_mesh.FaceMesh(
