@@ -113,8 +113,8 @@ if __name__ == '__main__':
 
             ironman_filter = cv2.resize(ironman_filter, (filter_width, filter_height))
 
-            x_offset = int(left[0] * 0.95)
-            y_offset = int(top[1] * 0.8)
+            x_offset = int(top_left[0])
+            y_offset = int(top_left[1])
 
             y1, y2 = y_offset, y_offset + ironman_filter.shape[0]
             x1, x2 = x_offset, x_offset + ironman_filter.shape[1]
