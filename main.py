@@ -5,8 +5,15 @@ import cv2
 import requests
 import shutil
 from mediapipe.python.solutions.drawing_utils import DrawingSpec, BLUE_COLOR
+"""
+This project is the main execution of the face filter. Pictures are provided from twitter and here is where
+the filters are applied to any faces detected on the pictures uploaded by users.
 
+author: Vilian Popov
+"""
 if __name__ == '__main__':
+    # initially, we set up the project needs and tweetfiltered API from google cloud (Google AppEngine)
+
     mp_drawing = mp.solutions.drawing_utils
     mp_face_mesh = mp.solutions.face_mesh
     api_all_url = "https://tweetfilteredrestapi.ey.r.appspot.com/api/tweetfilteredV1/all"
@@ -15,6 +22,8 @@ if __name__ == '__main__':
 
     IMAGE_URLS = []
 
+    # the two following for loops extract the images from twitter with the help of the already created API and prepare them
+    # for work with filters.
     for post in response.json():
         if post['media'] is not None:
             for m in post['media']:
@@ -42,7 +51,8 @@ if __name__ == '__main__':
         else:
             print("problem")
 
-    IMAGE_FILES = ['test_person.jpg', 'test_people.JPEG']
+    # the following line could be uncommented for test purposes.
+    # IMAGE_FILES = ['test_person.jpg', 'test_people.JPEG']
 
     for file in os.listdir('imgs'):
         image = 'imgs/' + file
@@ -57,7 +67,7 @@ if __name__ == '__main__':
         image = cv2.imread(file)
         results = face_mesh.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
 
-#Print and draw facemesh details on faces
+    # Print and draw facemesh details on faces
 
         if not results.multi_face_landmarks:
             continue
@@ -67,18 +77,12 @@ if __name__ == '__main__':
         ironman_filter = cv2.imread('ironmanfilter.png', -1)
         filter_ratio = ironman_filter.shape[1] / ironman_filter.shape[0]
 
-        #testimg = image.copy()
+        # the following line could be uncommented for testing purposes.
+        # testimg = image.copy()
         height, width, _ = image.shape
 
+        # we draw dots on all face landmarks and save the final product as an annotated_image.
         for face_landmarks in results.multi_face_landmarks:
-            """for i in range(190,200):
-                pt1 = face_landmarks.landmark[i]
-                x = int(pt1.x * width)
-                y = int(pt1.y * height)
-
-                cv2.circle(testimg, (x,y), 2, (100,0,0), -1)
-                cv2.putText(testimg, str(i), (x,y), 1, 1, (0,0,0))
-            """
             print('face_landmarks:', face_landmarks)
             mp_drawing.draw_landmarks(
                 image=annotated_image,
@@ -92,6 +96,7 @@ if __name__ == '__main__':
             right = (int(face_landmarks.landmark[454].x * width), int(face_landmarks.landmark[454].y * height))
             center = (int(face_landmarks.landmark[195].x * width), int(face_landmarks.landmark[195].y * height))
 
+            # the following print statements are for clarity of the face positions.
             print('landmark10(top) coords: ', top)
             print('landmark152(bot) coords: ', bot)
             print('landmark34(left) coords: ', left)
@@ -111,7 +116,7 @@ if __name__ == '__main__':
                           thickness = 10
                           )
 
-            ironman_filter = cv2.resize(ironman_filter, (filter_width, filter_height))
+            ironman_filter = cv2.resize(ironman_filter, (filter_width, filter_height)) # the filter is resized according to the face details
 
             x_offset = int(top_left[0])
             y_offset = int(top_left[1])
@@ -123,18 +128,15 @@ if __name__ == '__main__':
             alpha_l = 1.0 - alpha_s
 
             for c in range(0, 3):
-                filtered_image[y1:y2, x1:x2, c] = (alpha_s * ironman_filter[:, :, c] + alpha_l * filtered_image[y1:y2, x1:x2, c])
+                filtered_image[y1:y2, x1:x2, c] = (alpha_s * ironman_filter[:, :, c] + alpha_l * filtered_image[y1:y2, x1:x2, c]) # we overlay the filter
 
+            # the following lines could be uncommented for test purposes.
 
             #cv2.imshow('test', filtered_image)
             #cv2.waitKey(0)
+
+            # the final files are saved as images on the drive in folder tmp.
+
             cv2.imwrite('tmp/annotated_image' + str(idx) + '.png', annotated_image)
             cv2.imwrite('tmp/filtered_image' + str(idx) + '.png', filtered_image)
             cv2.imwrite('tmp/square_image' + str(idx) + '.png', square_image)
-
-            """
-
-            cv2.imshow('test', testimg)
-            cv2.waitKey(0)
-            
-            """
